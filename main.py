@@ -10,8 +10,7 @@ PROJECT: RUDMENTARY BLOCKCHAIN IN PYTHON
 import hashlib
 import datetime
 import json
-
-
+from typing import Any
 
 """
 this function will encrypt all the arguments passed and return an a hashing of
@@ -34,6 +33,7 @@ class Transaction:
         self.__RECEIVER_ADDRESS = RECEIVER_ADDRESS
         self.__AMOUNT = AMMOUNT
 
+    #GETTERS
     def getSenderAddress(self):
         return self.__SENDER_ADDRESS
 
@@ -43,6 +43,7 @@ class Transaction:
         return self.__AMOUNT
 
 
+
     def __str__(self):
         return json.dumps({"sender": self.__SENDER_ADDRESS, "receiver": self.__RECEIVER_ADDRESS, "amount": self.__AMOUNT},
                           separators=(",", ":"))
@@ -50,13 +51,48 @@ class Transaction:
 
 """
 The block class contains 5 attributes, the timeStamp: when the block has been created, the ledger: list of all 
-pending transactions, the previousHash: pointing to the previous block, and CurrentHash: the hash of the current block
+pending transactions, the previousHash: pointing to the previous block,  CurrentHash: the hash of the current block
+and the nonce that will be increased until the hash problem solve is finished during the mining period of the block
 """
 
 class Block:
-    def __init__(self, TIME_STAMP, LEDGER):
+    def __init__(self, TIME_STAMP, LEDGER, previousHash =""):
         self.__TIME_STAMP = TIME_STAMP
         self.__LEDGER = LEDGER
+        self.__previousHash = previousHash
+        self.nonce = 0
+        self.__hash = self.createHash()
 
 
+    def createHash(self):
+        return encrypt(self.__TIME_STAMP, self.__LEDGER, self.__previousHash, self.nonce)
 
+
+    #the mine block method gets a dificulty as a parameter, the higher the difficulty the more time is needed to mine the block
+
+    def mineBlock(self, difficulty):
+
+        while self.__hash[0-difficulty] !=difficulty*"0":
+            self.nonce = self.nonce + 1
+
+    # GETTERS
+
+    def getPreviousHash(self):
+        return self.__previousHash
+
+    def getNonce(self):
+        return self.nonce
+
+    def getTimeStamp(self):
+        return self.__TIME_STAMP
+
+    def getLedger(self):
+        return self.__LEDGER
+
+    def getHash(self):
+        return self.__hash
+
+    # setter
+    def setPreviousHash(self, previousHash):
+        self.__previousHash = previousHash
+        self.__hash = self.createHash()
