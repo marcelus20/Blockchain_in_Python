@@ -34,17 +34,29 @@ class Transaction:
         self.__RECEIVER_ADDRESS = RECEIVER_ADDRESS
         self.__AMOUNT = AMMOUNT
 
-        def getSenderAddress():
-            return self.__SENDER_ADDRESS
+    def getSenderAddress(self):
+        return self.__SENDER_ADDRESS
 
-        def getReceiverAddress():
-            return self.__RECEIVER_ADDRESS
-        def getAmount():
-            return self.__AMOUNT
+    def getReceiverAddress(self):
+        return self.__RECEIVER_ADDRESS
+    def getAmount(self):
+        return self.__AMOUNT
 
 
     def __str__(self):
         return json.dumps({"sender": self.__SENDER_ADDRESS, "receiver": self.__RECEIVER_ADDRESS, "amount": self.__AMOUNT},
                           separators=(",", ":"))
+
+
+"""
+The block class contains 5 attributes, the timeStamp: when the block has been created, the ledger: list of all 
+pending transactions, the previousHash: pointing to the previous block, and CurrentHash: the hash of the current block
+"""
+
+class Block:
+    def __init__(self, TIME_STAMP, LEDGER):
+        self.__TIME_STAMP = TIME_STAMP
+        self.__LEDGER = LEDGER
+
 
 
