@@ -100,14 +100,16 @@ class Block:
 
 
     def __str__(self):
+        string = "["
+        for trans in self.getLedger():
+            string += trans.__str__()
         return json.dumps(
             {"Date": self.__TIME_STAMP,
-             "Ledger": self.__LEDGER,
+             "Ledger": string,
              "Previous Hash": self.__previousHash,
              "Hash": self.__hash,
-             "nonce": self.__nonce},
+             "nonce": self.__nonce}, sort_keys=True, indent=4)
 
-            separators=(",", ":"))
 
 
 
@@ -117,8 +119,8 @@ of mining and pending transactions: an list of transactions that will be mined b
 """
 class Blockchain:
     def __init__(self):
-        self.chain = [self.createGenesisBlock()]#CREATING AND ADDING GENESIS BLOCK
-        self.difficulty = 4
+        self.CHAIN = [self.createGenesisBlock()]#CREATING AND ADDING GENESIS BLOCK
+        self.difficulty = 5
         self.pendingTransactions = []
         self.reward = 100
 
@@ -133,34 +135,37 @@ class Blockchain:
 
 
     def getLatestBlock(self):
-        return self.chain[-1]
+        return self.CHAIN[-1]
 
 
     def miningPendingTransactions(self, MINER_ADDRESS):
+        print("mining block...")
         block = Block(datetime.datetime.now().strftime("%d-%m-%Y %H:%M"), self.pendingTransactions)
         #setting previous hash to the value of the Hash of the latest block on the blockchain
         block.setPreviousHash(self.getLatestBlock().getHash())
         #mine the block
         block.mineBlock(self.difficulty)
         #adding this up to the blockchain
-        self.chain.append(block)
+        self.CHAIN.append(block)
         #setPending transactions to the reward to the miner
         self.pendingTransactions = [Transaction(None, MINER_ADDRESS, self.reward)]
+        print("Block mined successfully")
+        print("Hash: "+ block.getHash())
 
     def isValid(self):
 
-        for i in range(1, len(self.chain)):
-            if(self.chain[i].getPreviousHash() != self.chain[i-1].getHash()):
+        for i in range(1, len(self.CHAIN)):
+            if(self.CHAIN[i].getPreviousHash() != self.CHAIN[i - 1].getHash()):
                 return False
 
-            if(self.chain[i].getHash() != self.chain[i].createHash()):
+            if(self.CHAIN[i].getHash() != self.CHAIN[i].createHash()):
                 return False
         return True
 
 
     def getBalanceOf(self, ADDRESS):
         balance = 0
-        for block in self.chain:
+        for block in self.CHAIN:
             for ledger in block.getLedger():
 
                 if ADDRESS == ledger.getSenderAddress():
@@ -168,20 +173,49 @@ class Blockchain:
                 if ADDRESS == ledger.getReceiverAddress():
                     balance = balance + ledger.getAmount()
 
-
-
-
         return balance
 
+    def __str__(self):
+        string = ""
+        for block in self.CHAIN:
+            string += "{"+json.dumps(block.__str__(), sort_keys=True, indent=4)+"}"
+        return string
 
 
-block = Blockchain()
-block.createATransaction(Transaction("felipe", "sara", 50))
-block.createATransaction(Transaction("felipe", "sara", 100))
-block.miningPendingTransactions("F")
-#print(block.chain)
+#TESTING:
 
-print(block.getBalanceOf("felipe"))
+#instance:
+myBlockchain = Blockchain()
+
+#adding some transactions to the blockchain
+myBlockchain.createATransaction(Transaction("address1", "address2", 200))
+myBlockchain.createATransaction(Transaction("address2", "address1", 50))
+
+#mining the block to validate transactions:
+
+myBlockchain.miningPendingTransactions("felipeMiner")
+
+#adding more two transactions and mining the block
+myBlockchain.createATransaction(Transaction("address1", "address2", 10))
+myBlockchain.createATransaction(Transaction("felipeMiner", "address1", 50))
+#transactions won't be validated without mining
+myBlockchain.miningPendingTransactions("AugustoMiner")
+
+#checking the balance of address1 and balance of address2
+print("The balance of address 1 is: "+str(myBlockchain.getBalanceOf("address1")))
+print("The balance of the address 2 is "+str(myBlockchain.getBalanceOf("address2")))
+print("The address of felipeMiner is "+str(myBlockchain.getBalanceOf("felipeMiner")))
+#The balance of the miner will always be update on the following mining process
+
+
+#printing the whole blockChain: -- depending of the console, it won't look pretty
+#print(myBlockchain)
+
+#checking integrity of the blockchain:
+print("This blockchain has not been tampered with: "+str(myBlockchain.isValid()))
+
+
+
 
 
 
