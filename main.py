@@ -60,20 +60,21 @@ class Block:
         self.__TIME_STAMP = TIME_STAMP
         self.__LEDGER = LEDGER
         self.__previousHash = previousHash
-        self.nonce = 0
+        self.__nonce = 0
         self.__hash = self.createHash()
 
 
     def createHash(self):
-        return encrypt(self.__TIME_STAMP, self.__LEDGER, self.__previousHash, self.nonce)
+        return encrypt(self.__TIME_STAMP, self.__LEDGER, self.__previousHash, self.__nonce)
 
 
     #the mine block method gets a dificulty as a parameter, the higher the difficulty the more time is needed to mine the block
 
     def mineBlock(self, difficulty):
 
-        while self.__hash[0-difficulty] !=difficulty*"0":
-            self.nonce = self.nonce + 1
+        while self.__hash[0:difficulty] !=difficulty*"0":
+            self.__nonce = self.__nonce + 1
+            self.__hash = self.createHash()
 
     # GETTERS
 
@@ -81,7 +82,7 @@ class Block:
         return self.__previousHash
 
     def getNonce(self):
-        return self.nonce
+        return self.__nonce
 
     def getTimeStamp(self):
         return self.__TIME_STAMP
@@ -96,3 +97,18 @@ class Block:
     def setPreviousHash(self, previousHash):
         self.__previousHash = previousHash
         self.__hash = self.createHash()
+
+
+    def __str__(self):
+        return json.dumps(
+            {"Date": self.__TIME_STAMP,
+             "Ledger": self.__LEDGER,
+             "Previous Hash": self.__previousHash,
+             "Hash": self.__hash,
+             "nonce": self.__nonce},
+
+            separators=(",", ":"))
+
+
+
+
