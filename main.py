@@ -111,4 +111,79 @@ class Block:
 
 
 
+"""
+BLOCKCHAIN CLASS is just an list of blocks, the attributes are chain: the list of linked blocks, difficulty: the level 
+of mining and pending transactions: an list of transactions that will be mined by a miner in order to validate them
+"""
+class Blockchain:
+    def __init__(self):
+        self.chain = [self.createGenesisBlock()]#CREATING AND ADDING GENESIS BLOCK
+        self.difficulty = 4
+        self.pendingTransactions = []
+        self.reward = 100
+
+    #THE VERY FIRST BLOCK CREATED AUTOMATICALLY BY THE SYSTEM
+    def createGenesisBlock(self):
+        return Block(datetime.datetime.now().strftime("%d-%m-%Y %H:%M"), [Transaction(None, None, None)])
+
+
+    #appending transactions to pending transaction attribute
+    def createATransaction(self, TRANSACTIONS):
+        self.pendingTransactions.append(TRANSACTIONS)
+
+
+    def getLatestBlock(self):
+        return self.chain[-1]
+
+
+    def miningPendingTransactions(self, MINER_ADDRESS):
+        block = Block(datetime.datetime.now().strftime("%d-%m-%Y %H:%M"), self.pendingTransactions)
+        #setting previous hash to the value of the Hash of the latest block on the blockchain
+        block.setPreviousHash(self.getLatestBlock().getHash())
+        #mine the block
+        block.mineBlock(self.difficulty)
+        #adding this up to the blockchain
+        self.chain.append(block)
+        #setPending transactions to the reward to the miner
+        self.pendingTransactions = [Transaction(None, MINER_ADDRESS, self.reward)]
+
+    def isValid(self):
+
+        for i in range(1, len(self.chain)):
+            if(self.chain[i].getPreviousHash() != self.chain[i-1].getHash()):
+                return False
+
+            if(self.chain[i].getHash() != self.chain[i].createHash()):
+                return False
+        return True
+
+
+    def getBalanceOf(self, ADDRESS):
+        balance = 0
+        for block in self.chain:
+            for ledger in block.getLedger():
+
+                if ADDRESS == ledger.getSenderAddress():
+                    balance = balance - ledger.getAmount()
+                if ADDRESS == ledger.getReceiverAddress():
+                    balance = balance + ledger.getAmount()
+
+
+
+
+        return balance
+
+
+
+block = Blockchain()
+block.createATransaction(Transaction("felipe", "sara", 50))
+block.createATransaction(Transaction("felipe", "sara", 100))
+block.miningPendingTransactions("F")
+#print(block.chain)
+
+print(block.getBalanceOf("felipe"))
+
+
+
+
 
