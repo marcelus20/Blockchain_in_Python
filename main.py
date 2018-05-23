@@ -119,10 +119,10 @@ of mining and pending transactions: an list of transactions that will be mined b
 """
 class Blockchain:
     def __init__(self):
-        self.CHAIN = [self.createGenesisBlock()]#CREATING AND ADDING GENESIS BLOCK
-        self.difficulty = 5
-        self.pendingTransactions = []
-        self.reward = 100
+        self.__CHAIN = [self.createGenesisBlock()]#CREATING AND ADDING GENESIS BLOCK
+        self.__DIFFICULTY = 5
+        self.__pendingTransactions = []
+        self.__REWARD = 100
 
     #THE VERY FIRST BLOCK CREATED AUTOMATICALLY BY THE SYSTEM
     def createGenesisBlock(self):
@@ -131,41 +131,41 @@ class Blockchain:
 
     #appending transactions to pending transaction attribute
     def createATransaction(self, TRANSACTIONS):
-        self.pendingTransactions.append(TRANSACTIONS)
+        self.__pendingTransactions.append(TRANSACTIONS)
 
 
     def getLatestBlock(self):
-        return self.CHAIN[-1]
+        return self.__CHAIN[-1]
 
 
     def miningPendingTransactions(self, MINER_ADDRESS):
         print("mining block...")
-        block = Block(datetime.datetime.now().strftime("%d-%m-%Y %H:%M"), self.pendingTransactions)
+        block = Block(datetime.datetime.now().strftime("%d-%m-%Y %H:%M"), self.__pendingTransactions)
         #setting previous hash to the value of the Hash of the latest block on the blockchain
         block.setPreviousHash(self.getLatestBlock().getHash())
         #mine the block
-        block.mineBlock(self.difficulty)
+        block.mineBlock(self.__DIFFICULTY)
         #adding this up to the blockchain
-        self.CHAIN.append(block)
+        self.__CHAIN.append(block)
         #setPending transactions to the reward to the miner
-        self.pendingTransactions = [Transaction(None, MINER_ADDRESS, self.reward)]
+        self.__pendingTransactions = [Transaction(None, MINER_ADDRESS, self.__REWARD)]
         print("Block mined successfully")
         print("Hash: "+ block.getHash())
 
     def isValid(self):
 
-        for i in range(1, len(self.CHAIN)):
-            if(self.CHAIN[i].getPreviousHash() != self.CHAIN[i - 1].getHash()):
+        for i in range(1, len(self.__CHAIN)):
+            if(self.__CHAIN[i].getPreviousHash() != self.__CHAIN[i - 1].getHash()):
                 return False
 
-            if(self.CHAIN[i].getHash() != self.CHAIN[i].createHash()):
+            if(self.__CHAIN[i].getHash() != self.__CHAIN[i].createHash()):
                 return False
         return True
 
 
     def getBalanceOf(self, ADDRESS):
         balance = 0
-        for block in self.CHAIN:
+        for block in self.__CHAIN:
             for ledger in block.getLedger():
 
                 if ADDRESS == ledger.getSenderAddress():
@@ -177,7 +177,7 @@ class Blockchain:
 
     def __str__(self):
         string = ""
-        for block in self.CHAIN:
+        for block in self.__CHAIN:
             string += "{"+json.dumps(block.__str__(), sort_keys=True, indent=4)+"}"
         return string
 
